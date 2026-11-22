@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesperia — Quel Ophèniela est ton âme-soeur ?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --panel-bg: rgba(18, 18, 26, 0.85);
+            --cyan: #03fcf0;
+            --fuchsia: #fc037f;
+            --violet: #ad03fc;
+            --text-main: #e0e0ff;
+            --text-muted: #9494b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(173, 3, 252, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(252, 3, 127, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(3, 252, 240, 0.08) 0%, transparent 50%);
+        }
+
+        /* Barre de navigation */
+         header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* 2. Le conteneur .logo a un position: relative pour bloquer le repère du logo à l'intérieur du header */
+        .logo {
+            position: relative; 
+            display: flex;
+            align-items: center;
+        }
+
+        /* 3. Ton logo géant en absolute, qui ne fait PAS grandir le header, et qui obéit enfin au left ! */
+        .logo img {
+            position: absolute; 
+            left: -60px;   /* <--- Mets des pixels négatifs (-10px, -30px...) pour le pousser vers la gauche, ou positifs pour la droite */
+            top: -10px;    /* <--- Pour le descendre ou le remonter par rapport au haut du header */
+            
+            height: 150px; /* Ta taille géante */
+            width: auto;
+            object-fit: contain;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.3s ease;
+            position: relative;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--cyan);
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        nav a.main-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--fuchsia);
+            box-shadow: 0 0 8px var(--fuchsia);
+            transition: width 0.3s ease;
+        }
+
+        nav a.main-link:hover::after, nav a.main-link.active::after {
+            width: 100%;
+        }
+
+        /* Menu Déroulant */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--panel-bg);
+            border: 1px solid rgba(173, 3, 252, 0.3);
+            border-radius: 8px;
+            list-style: none;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(173, 3, 252, 0.15);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 101;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(5px);
+        }
+
+        .dropdown-menu li {
+            width: 100%;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 0.7rem 1.2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(252, 3, 127, 0.1);
+            color: var(--fuchsia);
+            text-shadow: 0 0 8px var(--fuchsia);
+            padding-left: 1.5rem;
+        }
+
+        .dropdown > a::after {
+            content: ' ▼';
+            font-size: 0.65rem;
+            vertical-align: middle;
+            color: var(--violet);
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown:hover > a::after {
+            color: var(--cyan);
+            transform: rotate(180deg);
+        }
+
+        /* Style du Quiz */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            max-width: 750px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+       h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem); /* Légèrement réduit pour éviter que ça dépasse */
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            padding: 0 10px; /* Évite que les bords du texte soient rognés */
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--cyan), var(--fuchsia), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Note : text-shadow fait parfois bugger le rendu transparent sur certains navigateurs, on l'enlève pour le dégradé propre */
+        }
+
+        .quiz-intro {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+        }
+
+        .quiz-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(173, 3, 252, 0.25);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(173, 3, 252, 0.1);
+            backdrop-filter: blur(15px);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--fuchsia));
+            box-shadow: 0 0 10px var(--fuchsia);
+            transition: width 0.4s ease;
+        }
+
+        .question-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.8rem;
+            line-height: 1.4;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Style de la scrollbar pour les listes longues */
+        .options-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .options-list::-webkit-scrollbar-thumb {
+            background: rgba(173, 3, 252, 0.3);
+            border-radius: 3px;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(252, 3, 127, 0.08);
+            border-color: var(--fuchsia);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(252, 3, 127, 0.25);
+            transform: translateX(4px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 15, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            nav ul {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .dropdown-menu {
+                position: static;
+                transform: none;
+                box-shadow: none;
+                background: transparent;
+                border: none;
+                display: none;
+                padding-left: 1rem;
+            }
+            .dropdown:hover .dropdown-menu {
+                display: block;
+                transform: none;
+            }
+            .quiz-card {
+                padding: 1.5rem;
+            }
+        }
+        /* Styles pour l'écran de résultat du quiz */
+        .result-container {
+            text-align: center;
+        }
+
+        .result-subtitle {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            color: var(--violet);
+            font-weight: bold;
+        }
+
+        .result-title {
+            color: var(--cyan);
+            margin-top: 0.3rem;
+            font-size: 1.6rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .result-avatar-box {
+            margin: 1.5rem auto;
+            width: 200px;  /* Tu peux ajuster la largeur selon tes goûts */
+            height: 250px; /* Tu peux ajuster la hauteur (mets la même que width si tu veux un carré parfait) */
+            border-radius: 0px; /* Enlève l'arrondi (0 ou supprime la ligne) */
+            overflow: hidden;
+            border: 2px solid var(--fuchsia);
+            box-shadow: 0 0 20px rgba(252, 3, 127, 0.4);
+        }
+
+        .result-avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-name {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--cyan), var(--fuchsia));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0.5rem 0;
+            text-shadow: 0 0 20px rgba(252, 3, 127, 0.4);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .result-quote {
+            color: var(--text-main);
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 3px solid var(--cyan);
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .restart-btn {
+            text-align: center;
+            background: linear-gradient(135deg, var(--cyan), var(--violet));
+            color: #000;
+            font-weight: bold;
+            width: 100%;
+            justify-content: center;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px var(--cyan);
+        }
+
+        /* Liste de compatibilité des autres persos */
+        .compatibility-box {
+            margin-top: 2rem;
+            text-align: left;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+
+        .compatibility-title {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .compatibility-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .compatibility-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .compatibility-name {
+            font-weight: 600;
+        }
+
+        .compatibility-percent {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--fuchsia);
+            font-weight: bold;
+        }
+         @media (max-width: 768px) {
+            .logo {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barre de Navigation -->
+    <header>
+        <div class="logo">
+    <a href="index.html"><img src="images/logo.gif" ></a>
+</div>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="main-link">Accueil</a></li>
+                <li><a href="#" class="main-link">Présentation RP</a></li>
+                <li class="dropdown">
+                    <a href="#" class="main-link active">Quiz & Tests</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="lover_test.html" class="active" style="color: var(--cyan);">Qui est ton âme-soeur ?</a></li>
+                    </ul>
+                </li>
+                <li><a href="#" class="main-link">Lore</a></li>
+                <li><a href="#" class="main-link">Mini-jeux</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenu du Quiz -->
+    <main>
+        <div class="quiz-header">
+            <h1>Quel Ophèniela est ton âme-soeur ?</h1>
+            <p class="quiz-intro">Vous vous êtes toujours demandé quel Ophèniela est fait pour vous ? Avec ce test, vous le saurez !</p>
+        </div>
+
+        <div class="quiz-card">
+            <!-- Infos de progression -->
+            <div class="progress-info">
+                <span id="question-counter">Question 1 / 16</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+
+            <!-- Question et Réponses -->
+            <div id="quiz-content">
+                <h2 class="question-title" id="question-title">Chargement...</h2>
+                <div class="options-list" id="options-container">
+                    <!-- Les boutons vont s'injecter ici via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Hesperia — Tous droits réservés 💜</p>
+    </footer>
+
+    <!-- Script JavaScript du Quiz -->
+    <script>
+        // Liste de tes 13 personnages pour initialiser les scores à 0
+        let scores = {
+            "Meyliss": 0, "Haisché": 0, "Gaysh": 0, "Skye": 0,
+            "Shaun": 0, "Clyssia": 0, "Shenoa": 0, "Romy": 0,
+            "Shadya": 0, "Gouashe": 0, "Blade": 0, "Skai": 0, "Kayla": 0
+        };
+
+const characterDetails = {
+            "Meyliss": {
+                image: "images/meyliss1.png",
+                text: "« Tu es le match parfait pour la belle et capricieuse Meyliss - Diner chic, fleurs et sorties romantiques, tu ne peux que la combler ! Attention aux talons qui volent quand elle est dans ses mauvais jours.. »"
+            },
+            "Haisché": {
+                image: "images/haische1.png",
+                text: "« Une loyauté résistant à toute épreuve, une patience comme personne n'en a jamais vu, un don de savoir quand il faut te taire ou tenir tête ? T'as une chance de capter le regard d'Haisché ! »"
+            },
+            "Gaysh": {
+                image: "images/gaysh1.png",
+                text: "« Tu as l'air d'être sans prise de tête, parfait pour Gaysh - il te fera visiter tous les lieux secrets de Sétia sans jamais briser ta liberté. »"
+            },
+            "Skye": {
+                image: "images/skye1.png",
+                text: "« J'espère que tu as de la patience à revendre - Aucun jour ne se ressemble aux côtés de l'irrésistible Skye qui t'en fera voir de toutes les couleurs. »"
+            },
+            "Shaun": {
+                image: "images/shaun1.png",
+                text: "« Un bouquin au coin du feu, des sorties instructives et des petits mots doux glissés dans le creux d'une oreille, Shaun sera ravie d'écouter tout ce qui traverse ton esprit. »"
+            },
+            "Clyssia": {
+                image: "images/Clyssia1.png",
+                text: "« Pas le temps de flirter, toujours trop occupée.. Mais tu as su capter son attention. Clyssia pourrait se dévoiler davantage. »"
+            },
+            "Shenoa": {
+                image: "images/shenoa1.png",
+                text: "« Si être chouchouté ne te fait pas peur, c'est que tu es bien tombé. Malgré son caractère, tu réussirais peut-être à atteindre son petit coeur tendre. »"
+            },
+            "Romy": {
+                image: "images/romy1.png",
+                text: "« Un braquage de banque à la Bonnie & Clyde, un texto tous les trois jours... Clairement, tu es son genre de chaos. »"
+            },
+            "Shadya": {
+                image: "images/shadya1.png",
+                text: "« Protège la peu importe ce qu'il t'en coûte - elle t'aimera à en crever. »"
+            },
+            "Gouashe": {
+                image: "images/gouashe1.png",
+                text: "« Un bon dîner maison, du vin et de la famille. Installe-toi, il s'occupe de tout. »"
+            },
+            "Blade": {
+                image: "images/blade1.png",
+                text: "« Le taf est prenant, mais ce qu'il préfère c'est rentrer avec une maison occupée et chaude de présence. »"
+            },
+            "Skai": {
+                image: "images/skai1.png",
+                text: "« Prêt.e pour l'aventure ? Skai est une machine qui ne tient jamais en place - Entre une partie de laser game et un mur d'escalade avant d'aller se défouler en concert, tu as intérêt à suivre son rythme ! »"
+            },
+            "Kayla": {
+                image: "images/kayla1.png",
+                text: "« Randonnée à 6h du mat' et liberté absolue ! Si tu tiens le choc, t'as trouvé ton âme-soeur. »"
+            }
+        };
+
+        const questions = [
+            {
+                title: "Tu as décidé de te déclarer à la personne que tu aimes..",
+                options: [
+                    { text: "Un texto, et ça part.", characters: ["Skai", "Romy", "Kayla" ] },
+                    { text: "Et puis quoi encore ? Plutôt mourir.", characters: ["Meyliss", "Haisché", "Clyssia", "Skye"] },
+                    { text: "J’ai absolument rien décidé, c’est sorti tout seul.", characters: ["Gouashe",  "Shaun", "Gaysh", "Shenoa"] },
+                    { text: "J’organise un rendez-vous parfait et je récite ma déclaration au mot près.", characters: ["Shadya",  ] },
+                    { text: "AH ! Je stresse. J’ai le coeur qui frappe fort, mes mains tremblent, c’est une torture.", characters: ["Blade" ] }
+                ]
+            },
+            {
+                title: "Tu te considères plutôt nocturne, ou comme une personne du jour ?",
+                options: [
+                    { text: "De jour.", characters: ["Shadya", "Shaun", "Gaysh", "Clyssia", "Blade", "Kayla"] },
+                    { text: "De nuit.", characters: ["Meyliss", "Haisché", "Gouashe", "Skai", "Shenoa", "Romy", "Skye"] } 
+                ]
+            },
+            {
+                title: "Quelle est ta saison préférée ? ",
+                options: [ 
+                    { text: "L’été", characters: ["Meyliss", "Gaysh", "Blade",  ] },
+                    { text: "Le printemps", characters: ["Shadya", "Skai", "Clyssia", "Kayla" ] },
+                    { text: "L’automne", characters: ["Haisché", "Shaun",   ] },
+                    { text: "L’hiver", characters: ["Gouashe", "Shenoa", "Romy", "Skye"  ] }
+                ]
+            },
+            {
+                title: "Si ton/ta partenaire te cachait un lourd secret pour te protéger, comment réagirais-tu en le découvrant ?",
+                options: [
+                    { text: "C’est ok, chacun peut avoir ses secrets.", characters: ["Haisché", "Gaysh", "Clyssia",  "Kayla", ] },
+                    { text: "Ca pique, mais je ne lui en tiens pas rigueur.", characters: ["Shadya", "Meyliss", , "Shaun", "Romy", ] },
+                    { text: "J’ai du mal à accepter, mais je travaille dessus.", characters: ["Skai", "Shenoa",  ] },
+                    { text: "Je ne supporte pas les secrets. Je lui fais savoir.", characters: ["Skye" ] },
+                    { text: "Je lui rapelle qu'elle/il peut tout me dire.", characters: ["Gouashe", "Blade",  ] } 
+                ]
+            },
+            {
+                title: "Quel est le date de tes rêves ?",
+                options: [
+                    { text: "Regarder les étoiles la nuit.", characters: ["Shenoa"] },
+                    { text: "Un bouquet de fleurs, une table dans un restaurant chic, puis une balade le long des quais.", characters: ["Meyliss"] },
+                    { text: "Laser game, bowling, parc d’attractions, escalade, concert, canoë, accrobranche. Faut que ça bouge !", characters: ["Skai"] },
+                    { text: "Un dîner maison, du vin, et de la bonne musique.", characters: ["Gouashe"] },
+                    { text: "Pas le temps.", characters: ["Clyssia"] },
+                    { text: "Un pique nique fait maison dans un parc, à l’ombre d‘un arbre ou au bord d’un lac.", characters: ["Shadya"] },
+                    { text: "Mon cuisto personnel peut cuisiner ce que tu veux.", characters: ["Blade"] },
+                    { text: "Un quoi ?", characters: ["Gaysh"] },
+                    { text: "Braquage de banque ma gueule", characters: ["Romy"] },
+                    { text: "Pour quoi faire ?", characters: ["Haisché"] },
+                    { text: "Randonnée DI-RECT ! On part à 6h.", characters: ["Kayla"] },
+                    { text: "Parle moi de tes passions, de tes hyperfixations du moment.", characters: ["Shaun"] },
+                    { text: "J’aime organiser sur mesure, quelque chose de personnel.", characters: ["Skye"] }
+                ]
+            },
+            {
+                title: "Quelle valeur est la plus importante pour toi ?",
+                options: [
+                    { text: "L’ambition.", characters: ["Clyssia"] },
+                    { text: "L’amour.", characters: ["Shadya"] },
+                    { text: "L’authenticité.", characters: ["Gaysh"] },
+                    { text: "La liberté.", characters: ["Kayla"] },
+                    { text: "L’honnêteté.", characters: ["Skye"] },
+                    { text: "Le respect.", characters: ["Meyliss"] },
+                    { text: "La loyauté.", characters: ["Haisché"] },
+                    { text: "L'empathie.", characters: ["Shaun"] },
+                    { text: "L'ouverture d’esprit.", characters: ["Skai"] },
+                    { text: "La bienveillance.", characters: ["Shenoa"] },
+                    { text: "L’amitié.", characters: ["Romy"] },
+                    { text: "Le courage.", characters: ["Blade"] },
+                    { text: "La famille.", characters: ["Gouashe"] }
+                ]
+            },
+            {
+                title: "Comment décrirais-tu ton sens de l'humour ?",
+                options: [
+                    { text: "Osé.. avec une pointe de noirceur.", characters: ["Shadya", "Meyliss"] },
+                    { text: "Cérébral.. ou un peu niais. On me comprend rarement.", characters: ["Shaun"] },
+                    { text: "Vif et parfois piquant.", characters: ["Haisché", "Gaysh"] },
+                    { text: "Je manie l'autodérision comme personne.", characters: ["Romy", "Shenoa", "Kayla"] },
+                    { text: "Classique, rien de bien fou.", characters: ["Blade", "Clyssia"] },
+                    { text: "Je mérite d'être sur scène tellement j’suis drôle", characters: ["Skai", "Skye"] },
+                    { text: "L’humour c’est pas mon truc.. j’ai d’autres qualités.", characters: ["Gouashe"] }
+                ]
+            },
+            {
+                title: "Concernant tes sentiments et tes émotions, comment t’exprimes-tu ?",
+                options: [
+                { text:"J’ai besoin de dire les choses cash et tout de suite.", characters: ["Blade", "Kayla"] },
+                { text: "Je m’exprime mieux une fois que j’ai trié mes idées : je préfère une discussion calme qu’une réaction à chaud", characters: ["Shadya", "Gouashe", "Gaysh"] },
+                { text: "Je garde souvent mon jardin secret au début ; j’ai besoin de confiance et de temps pour m’ouvrir pleinement.", characters: ["Haisché", "Clyssia"] },
+                { text: "Je suis très réactif·ve émotionnellement : quand quelque chose me touche, ça se ressent tout de suite dans mon énergie et mes mots.", characters: ["Shaun", "Shenoa", "Skai"] },
+                { text: "Ça dépend du moment et de la personne : je peux être très ouvert·e dans un climat de confiance, ou plus discret·te quand je suis fatigué·e.", characters: ["Skye" ] },
+                { text: "Pas correctement.. Je fais des efforts pour m'améliorer.", characters: ["Romy", "Meyliss"] } 
+                ]
+            },
+            {
+                title: "Plutôt monogame, ouvert à une troisième personne ou couple libre ?",
+                options: [
+                { text: "Monogame, relation exclusive.", characters: ["Shadya", "Meyliss", "Haisché", "Gouashe", "Shaun", "Shenoa", "Clyssia", "Blade", "Skye"] }, 
+                { text: "Je suis bien avec une seule personne.. mais je suis pas contre un ajout, seulement si on est tous sur la même longueur d’onde.", characters: ["Skai", "Kayla", "Romy"] },
+                { text: "Pas de chaines, pas d’obligations, mais j’aime retrouver ma/mon/mes partenaire.s  de temps en temps.", characters: ["Gaysh"]} 
+                ]
+            },
+            {
+                title: "Comment décrirais-tu ta jalousie dans un couple ?",
+                options: [
+                { text: "Je fais confiance à mon/ma partenaire et je me sens sécure : à quoi bon être jaloux·se quand la relation est solide ?", characters: ["Shaun", "Gouashe" ] }, 
+                { text: "Elle est quasi inexistante chez moi : ce n’est tout simplement pas un réflexe naturel dans mes relations.", characters: ["Gaysh", "Romy", "Kayla" ] }, 
+                { text: "Je peux la montrer de temps en temps, sans m’en cacher, mais en gardant toujours des limites saines.", characters: [ "Shadya", "Haisché" ] }, 
+                { text: "Je suis trop nul·le pour la cacher : quand elle pointe le bout de son nez, ça se voit tout de suite. »",  characters: ["Skai", "Clyssia" ] }, 
+                { text: "Je la montre parfois ; tant qu’elle est justifiée et bien placée, je ne vois pas où est le problème.", characters: ["Blade" ] }, 
+                { text: "Si on est ensemble, tu es à moi et je suis à toi : j’assume un côté très exclusif.", characters: ["Shenoa", "Meyliss" ] },
+                { text: "Je ne me cache pas pour défendre ce qui m’appartient quand je sens que mon territoire est menacé.", characters: [ "Skye"] } 
+                 
+                ]
+            },
+            {
+                title: "Le langage de l'amour qui te définit le mieux ?",
+                options: [
+                { text: "Une vraie soirée à deux sans écran, où l’on se parle à cœur ouvert et où l’on se dit ce qu’on apprécie chez l’autre.", characters: ["Shadya", "Skye" ] },
+                { text: "Être collé·e sur le canapé, se tenir la main ou se faire un câlin pendant qu’on partage un moment rien qu’à nous.", characters: ["Shaun" ] },
+                { text: "Que l’autre allège mon quotidien avec une petite attention pratique, puis qu’on profite du temps libre gagné ensemble.", characters: ["Shenoa" ] },
+                { text: "Un petit cadeau pensé pour moi accompagné d’un mot doux ou d’un compliment qui montre qu’on a vraiment cerné qui je suis.", characters: ["Blade" ] },
+                { text: "Un regard complice, un geste tendre et des mots qui rassurent ou encouragent au bon moment.", characters: ["Romy" ] },
+                { text: "Quelqu’un qui gère un truc pénible pour moi et qui vient m’enlacer ou me toucher l’épaule en passant : simple et très concret.", characters: ["Clyssia" ] },
+                { text: "Rapporter un petit souvenir ou une surprise d’une sortie partagée, comme une trace tangible de nos bons moments.", characters: ["Meyliss", "Kayla" ] },
+                { text: "Un mélange de présence attentive, de gestes affectueux et de mots sincères : c’est l’ensemble qui me fait me sentir aimé·e.", characters: ["Haisché", "Skai" ] },
+                { text: "Ça dépend totalement de mon humeur et du moment", characters: ["Gouashe", "Gaysh" ] } 
+                ]
+            },
+            {
+                title: "Quel est le green flag que tu apprécies chez un(e) partenaire ?",
+                options: [
+                { text: "Son romantisme.", characters: ["Shadya" ] },
+                { text: "Être directe.", characters: ["Meyliss" ] },
+                { text: "Son humour.", characters: ["Haisché" ] },
+                { text: "Être attentionné.", characters: ["Gouashe" ] },
+                { text: "Être réfléchi.", characters: ["Shaun" ] },
+                { text: "L’ouverture d’esprit.", characters: ["Gaysh" ] },
+                { text: "L’énergie.", characters: ["Skai" ] },
+                { text: "La douceur.", characters: ["Shenoa" ] },
+                { text: "La persévérance", characters: ["Clyssia" ] },
+                { text: "La tranquillité.", characters: ["Romy" ] },
+                { text: "Sa positivité.", characters: ["Blade" ] },
+                { text: "Son honnêteté.", characters: ["Kayla" ] },
+                { text: "Son intelligence.", characters: ["Skye" ] } 
+                ]
+            },
+            {
+                title: "Quel est ton pire red flag ?",
+                options: [
+                { text: "Garde un jardin secret tellement dense qu'on a l'impression de côtoyer un dossier classé Top Secret en permanence.", characters: ["Haisché", "Romy", "Skye" ] },
+                { text: "\"Je ne suis pas jaloux/jalouse, je suis juste lucide sur le fait que les autres ne te méritent pas.\"", characters: ["Shadya", "Shenoa" ] },
+                { text: "Disparaît complètement ou refuse de parler dès qu'un conflit éclate.", characters: ["Meyliss", "Blade" ] },
+                { text: "Préfère s'effondrer en secret plutôt que de demander de l'aide ou de montrer une faiblesse.", characters: ["Shaun", "Clyssia" ] },
+                { text: "Ne répond pas aux messages pendant 3 jours parce qu'il/elle \"a totalement oublié\".", characters: ["Gouashe", "Gaysh", "Skai", "Kayla" ] },
+                ]
+            },
+            {
+                title: "Tu peux prendre deux semaines de vacances avec ta/ton partenaire - où allez-vous ?",
+                options: [
+                { text: "Dans la campagne", characters: ["Shadya" ] } ,
+                { text: "Au soleil sous les cocotiers, Tropico Island !", characters: ["Meyliss" ] },
+                { text: "Dans un chalet en montagne pendant l’automne.", characters: ["Haisché" ] } ,
+                { text: "Peu importe tant que je suis avec ma/mon partenaire.", characters: ["Gouashe" ] } ,
+                { text: "Quelque part de calme, pour lire au coin du feu et rester un peu trop longtemps au lit.", characters: ["Shaun" ] } ,
+                { text: "Là où on peut faire la fête tous les soirs !", characters: ["Gaysh" ] } ,
+                { text: "Une ville où on peut bouger et faire pleins d’activités - pas de repos !", characters: ["Skai" ] } ,
+                { text: "Dans les montagnes enneigées avec des plaids et un chocolat chaud.", characters: ["Shenoa" ] } ,
+                { text: "Loin des villes. Quelque part pour me connecter à la nature.", characters: ["Clyssia" ] } ,
+                { text: "Pas fan des vacances - la flemme.", characters: ["Romy" ] } ,
+                { text: "Peu importe, tant que j’ai du réseau.", characters: ["Blade" ] } ,
+                { text: "Tant qu’on peut se balader, ça me va !", characters: ["Kayla" ] } ,
+                { text: "Dans une villa privée au bord d’une plage.", characters: ["Skye" ] } 
+                ]
+            },
+            {
+                title: "Tu préfères quelle dynamique de couple ?",
+                options: [
+                { text: "On vit à l’unisson : on se textote en continu, on passe nos soirées ensemble et on se raconte tout, quitte à mettre le reste du monde sur pause.", characters: ["Shadya",  ] } ,
+                { text: "On adore être ensemble et tout partager, mais on garde tout de même un petit fil avec nos amis ou nos occupations quand il le faut.", characters: ["Shadya", "Gouashe", "Shaun", "Skai"] } ,
+                { text: "On reste équilibré : chacun garde son espace et sa vie à côté, tout en cultivant une vraie complicité et un temps pour tout.", characters: ["Meyliss", "Haisché", "Shenoa", "Blade", "Skye" ] } ,
+                { text: "On prend des nouvelles de temps en temps, on a hâte de se retrouver, mais on sait patienter et vivre chacun de son côté sans stress.", characters: ["Kayla", "Clyssia" ] } ,
+                { text: "On se voit quand l’envie est là, de temps en temps, sans avoir besoin d’être collé·e ni de se donner des nouvelles à chaque heure.", characters: ["Gaysh", "Romy", "Kayla" ] } 
+                ]
+            },
+            {
+                title: "Quels sont tes buts dans la relation ?",
+                options: [
+                { text: "Le mariage et les enfants.", characters: ["Shadya", "Shaun" ] } ,
+                { text: "Un mariage ça me suffit.", characters: ["Blade", "Gouashe" ] } ,
+                { text: "Un ou deux marmots. Pas de mariage.", characters: ["Shenoa", "Blade" ] } ,
+                { text: "Vivre d'amour et d’eau fraîche, c’est déjà bien.", characters: ["Skai", "Clyssia", "Skye" ] } ,
+                { text: "Je sais pas, boire et faire la teuf ?", characters: ["Haisché" ] } ,
+                { text: "Baptiser tous les meubles de la maison.", characters: ["Meyliss" ] } ,
+                { text: "Pas vraiment de but si ce n'est de vivre heureux.se avec ma/mon partenaire.", characters: ["Gaysh", "Romy", "Kayla" ] } 
+                ]
+            },
+            {
+                title: "Comment gères-tu un conflit au sein de ta relation ?",
+                options: [
+                { text: "Je souffle un bon coup et j’en parle. Je veux réparer ce qui ne va pas, je communique.", characters: ["Shadya", "Gaysh", "Kayla" ] } ,
+                { text: "Je laisse ma/mon partenaire respirer, et je fais le premier pas.", characters: [ "Shaun", "Clyssia",  ] } ,
+                { text: "Je me braque - j’ai du mal à gérer les conflits - j’attends qu’on vienne vers moi.", characters: ["Gouashe", "Skai",  ] }, 
+                { text: "Je peux attendre plusieurs jours pour avoir les meilleures conditions possibles avant de parler.", characters: ["Meyliss", "Haisché",  ] } ,    
+                { text: "J’ai peur, je ne sais pas gérer les conflits, je suis peut-être un peu maladroit mais j’essaye.", characters: ["Shenoa", "Romy", "Blade", ] } 
+            ]
+            },
+            {
+                title: "Tu préfères avoir une relation officielle aux yeux des autres, ou tu es plutôt “vivons heureux, vivons cachés” ?",
+                options: [
+                { text: "J’aime la discrétion.", characters: [ "Gouashe", "Shaun", "Blade"] } ,
+                { text: "Ça m'est égal !", characters: [ "Haisché", "Gaysh", "Clyssia", "Romy", "Kayla" ] } ,
+                { text: "J’aime être vu avec ma/mon partenaire, et j’assume.", characters: [ "Shadya", "Meyliss", "Skai", "Skye", "Shenoa"] } 
+                ]
+            },
+            {
+                title: "Quand ça va mal, tu préfères : ",
+                options: [
+                { text: "Quelqu’un de présent, qui ne me lâche pas la semelle.", characters: [ "Shadya", "Skai", "Shenoa"] } ,
+                { text: "Quelqu’un de présent, mais qui me laisse respirer.", characters: [ "Gouashe", "Gaysh", "Skye", "Blade" ] } ,
+                { text: "Quelqu’un qui me laisse un peu seul, et sait que je reviendrais quand j’aurais besoin/quand j’irais mieux.", characters: [ "Kayla", "Romy", "Clyssia" ] } 
+                ]
+            },
+            {
+                title: "Qu’est-ce que tu apportes de bien dans ta relation ?",
+                options: [
+                { text: "De la stabilité et un sanctuaire de paix." , characters: ["Shadya", "Shenoa",  ] } ,
+                { text: "L’imprévu, l’adrénaline et des sorties en dehors de la zone de confort !" , characters: ["Haisché", "Skye" ] } ,
+                { text: "De l'attention, de la tendresse et une loyauté aveugle." , characters: ["Meyliss", "Shaun", "Clyssia",  ] } ,
+                { text: "De la légèreté, des rires, de l’écoute."  , characters: ["Gaysh", "Skai", "Gouashe", ] } ,
+                { text: "Un partenaire de choc avec qui tout est possible." , characters: [ "Romy", "Blade", "Kayla" ] } 
+                ]
+            } 
+        ];
+
+         let currentQuestion = 0;
+        const totalQuestions = questions.length;
+
+        const titleElement = document.getElementById("question-title");
+        const optionsContainer = document.getElementById("options-container");
+        const counterElement = document.getElementById("question-counter");
+        const percentElement = document.getElementById("progress-percent");
+        const fillElement = document.getElementById("progress-fill");
+
+        function loadQuestion() {
+            if (currentQuestion >= totalQuestions) {
+                let sortedChars = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+                let bestMatch = sortedChars[0];
+                let maxScore = scores[bestMatch] || 1;
+
+                let charData = characterDetails[bestMatch] || {
+                    image: "https://via.placeholder.com/150/03fcf0/0a0a0f?text=Opheniela",
+                    text: "Un destin lié dans les méandres d'Hesperia."
+                };
+
+                let compatibilityHTML = `
+                    <div class="compatibility-box">
+                        <h3 class="compatibility-title">📊 Compatibilité avec les autres Ophèniela</h3>
+                        <div class="compatibility-list">`;
+
+                sortedChars.forEach(char => {
+                    let percent = Math.round((scores[char] / maxScore) * 100);
+                    let isBest = char === bestMatch;
+                    compatibilityHTML += `
+                        <div class="compatibility-item">
+                            <span class="compatibility-name" style="color: ${isBest ? 'var(--cyan)' : 'var(--text-main)'};">${char} ${isBest ? '👑' : ''}</span>
+                            <span class="compatibility-percent">${percent}%</span>
+                        </div>`;
+                });
+
+                compatibilityHTML += `</div></div>`;
+
+                document.getElementById("quiz-content").innerHTML = `
+                    <div class="result-container">
+                        <span class="result-subtitle">Résultat de l'analyse</span>
+                        <h2 class="result-title">Ton âme-soeur est...</h2>
+                        
+                        <div class="result-avatar-box">
+                            <img src="${charData.image}" alt="${bestMatch}">
+                        </div>
+
+                        <div class="result-name">✨ ${bestMatch} ✨</div>
+
+                        <p class="result-quote">${charData.text}</p>
+                        
+                        <button class="restart-btn" onclick="location.reload()">Recommencer le test 💫</button>
+                    </div>
+                    ${compatibilityHTML}
+                `;
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            titleElement.textContent = q.title;
+            optionsContainer.innerHTML = "";
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = opt.text;
+                btn.onclick = () => {
+                    opt.characters.forEach(char => {
+                        if (scores[char] !== undefined) {
+                            scores[char]++;
+                        }
+                    });
+
+                    currentQuestion++;
+                    updateProgress();
+                    loadQuestion();
+                };
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function updateProgress() {
+            const progress = Math.round((currentQuestion / totalQuestions) * 100);
+            counterElement.textContent = `Question ${Math.min(currentQuestion + 1, totalQuestions)} / ${totalQuestions}`;
+            percentElement.textContent = `${progress}%`;
+            fillElement.style.width = `${progress}%`;
+        }
+
+        updateProgress();
+        loadQuestion();
+    </script>
+</body>
+</html>
