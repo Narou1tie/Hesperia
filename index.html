@@ -31,10 +31,34 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: relative;
             background-image: 
                 radial-gradient(circle at 10% 20%, rgba(173, 3, 252, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(252, 3, 127, 0.12) 0%, transparent 40%),
                 radial-gradient(circle at 50% 50%, rgba(3, 252, 240, 0.08) 0%, transparent 50%);
+        }
+
+        /* --- SYSTÈME D'ÉTOILES SCINTILLANTES --- */
+        .star {
+            position: absolute;
+            background-color: #ffffff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            opacity: var(--min-opacity);
+            z-index: 1; /* Derrière le contenu mais devant le fond */
+            pointer-events: none; /* Laisse passer les clics */
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: var(--min-opacity);
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+                box-shadow: 0 0 6px #ffffff, 0 0 10px var(--cyan);
+            }
         }
 
         /* CORRECTION : On a enlevé le "h " qui trainait devant header */
@@ -57,13 +81,11 @@
             align-items: center;
         }
 
-        /* 3. Ton logo géant en absolute, qui ne fait PAS grandir le header, et qui obéit enfin au left ! */
         .logo img {
             position: absolute; 
-            left: -60px;   /* <--- Mets des pixels négatifs (-10px, -30px...) pour le pousser vers la gauche, ou positifs pour la droite */
-            top: -10px;    /* <--- Pour le descendre ou le remonter par rapport au haut du header */
-            
-            height: 150px; /* Ta taille géante */
+            left: -60px;
+            top: -10px;
+            height: 150px;
             width: auto;
             object-fit: contain;
             display: block;
@@ -131,21 +153,18 @@
 
         /* --- RESPONSIVE MOBILE (Écrans <= 768px) --- */
         @media (max-width: 768px) {
-            /* 1. On cache définitivement le gros logo sur mobile */
             .logo {
                 display: none !important;
             }
 
-            /* 2. On affiche le bouton Burger */
             .menu-toggle {
                 display: block;
             }
 
-            /* 3. Le menu se transforme en panneau / bulle plein écran */
             nav ul {
                 position: fixed;
                 top: 0;
-                right: -100%; /* Caché hors de l'écran par défaut */
+                right: -100%;
                 width: 75%;
                 max-width: 300px;
                 height: 100vh;
@@ -162,12 +181,10 @@
                 z-index: 999;
             }
 
-            /* Quand on active la classe "open", le menu glisse sur l'écran */
             nav ul.open {
                 right: 0;
             }
 
-            /* Adaptation du menu déroulant sur mobile pour qu'il soit ouvert directement */
             .dropdown-menu {
                 position: static;
                 transform: none;
@@ -196,6 +213,8 @@
             padding: 4rem 2rem;
             max-width: 900px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2; /* S'assure que le texte est au-dessus des étoiles */
         }
 
         h1 {
@@ -230,6 +249,32 @@
             color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             background: rgba(10, 10, 15, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Style pour positionner l'image en bas à droite */
+        .galaxie-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: inline-block; 
+        }
+
+        .galaxie-img {
+            width: 300px;
+            height: auto; 
+            animation: monteeDescente 3s ease-in-out infinite;
+        }
+
+        @keyframes monteeDescente {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            } 
         }
     </style>
 </head>
@@ -246,13 +291,16 @@
 
         <nav>
             <ul id="nav-links">
-                <li><a href="index.html" class="main-link">Accueil</a></li>
-                <li><a href="#" class="main-link">Présentation RP</a></li>
+                <!-- On ajoute "active" ici sur Accueil -->
+                <li><a href="index.html" class="main-link active">Accueil</a></li>
+                <li><a href="#" class="main-link">TheWar - RP</a></li>
                 
                 <li class="dropdown">
-                    <a href="#" class="main-link active">Quiz & Tests</a>
+                    <!-- On a retiré "active" d'ici -->
+                    <a href="#" class="main-link">Quiz & Tests</a>
                     <ul class="dropdown-menu">
-                        <li><a href="lover_test.html" class="active" style="color: var(--cyan);">Qui est ton âme-soeur ?</a></li>
+                        <!-- Le lien du sous-menu garde sa couleur spécifique cyan si on est sur la page, ou s'enlève si c'est l'accueil -->
+                        <li><a href="lover_test.html">Qui est ton âme-soeur ?</a></li>
                     </ul>
                 </li>
 
@@ -268,12 +316,45 @@
         <p class="subtitle">Voilà l'endroit où quelques unes de mes idées vont prendre vie !</p>
     </main> 
 
+    <a href="https://votre-lien.com" target="_blank" class="galaxie-container">
+        <img src="images/galaxie.png" alt="Galaxie lumineuse" class="galaxie-img">
+    </a>
+
     <!-- Footer -->
     <footer>
         <p>Hesperia — Tous droits réservés 💜</p>
     </footer>
 
+    <!-- Script de génération dynamique des étoiles -->
     <script>
+        const numberOfStars = 150;
+
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+
+            // Position aléatoire
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+
+            // Taille (1px à 3px)
+            const size = Math.random() * 2 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+
+            // Vitesse de scintillement
+            const duration = Math.random() * 3 + 2;
+            star.style.setProperty('--duration', `${duration}s`);
+
+            // Opacité
+            const minOpacity = Math.random() * 0.4 + 0.1;
+            star.style.setProperty('--min-opacity', minOpacity);
+
+            document.body.appendChild(star);
+        }
+
         // Gestion du menu burger mobile
         const menuBtn = document.getElementById('menu-btn');
         const navLinks = document.getElementById('nav-links');
